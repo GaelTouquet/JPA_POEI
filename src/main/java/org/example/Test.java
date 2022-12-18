@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.model.Produit;
+import org.example.services.ProduitService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -13,45 +14,51 @@ public class Test {
     public static void main(String[] args) {
 
 
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("demojpa");
-        EntityManager em = emf.createEntityManager();
-
-        EntityTransaction transac = em.getTransaction();
-
-        transac.begin();
+        ProduitService ps = new ProduitService();
+        ps.begin();
 
         for (int i = 0; i < 5; i++) {
-            Produit faveFiveProduit = new Produit(
+            ps.create(new Produit(
                     "Je le vaux bien",
-                    String.format("n%d",i),
-                    new Date(),
-                    420.69,
-                    2*i +1
-            );
-            em.persist(faveFiveProduit);
+                    String.format("n%d", i),
+                    new Date(2022, i, 01),
+                    420.69 * i,
+                    2 * i + 1
+            ));
         }
-        transac.commit();
+        ps.envoie();
 
+        ps.begin();
+        Produit p = ps.findById(2);
+        ps.envoie();
+        System.out.println(p);
 
-        transac.begin();
-        Produit ProduitWithID2 = em.find(Produit.class,2);
-        transac.commit();
-        System.out.println(ProduitWithID2);
+        ps.begin();
+        ps.delete(ps.findById(3));
+        ps.envoie();
 
-        transac.begin();
-        Produit ProduitWithID3 = em.find(Produit.class,3);
-        em.remove(ProduitWithID3);
-        transac.commit();
+        ps.begin();
+        Produit produitWithID1 = ps.findById(1);
+        produitWithID1.setStock(produitWithID1.getStock() - 1);
+        ps.envoie();
 
-        transac.begin();
-        Produit ProduitWithID1 = em.find(Produit.class,1);
-        ProduitWithID1.setStock(ProduitWithID1.getStock()-1);
-        em.flush();
-        transac.commit();
+        System.out.println("filter by price");
+        ps.begin();
+        for (Produit cheapProduit : ps.filterByPrice(1200)
+        ) {
+            System.out.println(cheapProduit);
+        }
+        ps.envoie();
 
-        em.close();
-        emf.close();
+        System.out.println("filter by date");
+        ps.begin();
+        for (Produit cheapProduit : ps.fromDateToDate(new Date(2022, 01, 20), new Date(2022, 04, 10))
+        ) {
+            System.out.println(cheapProduit);
+        }
+        ps.envoie();
+
+        ps.close();
     }
-
 
 }

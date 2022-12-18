@@ -1,8 +1,6 @@
 package org.example.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -16,6 +14,7 @@ public class Produit {
 
     private String reference;
 
+    @Temporal(TemporalType.DATE)
     private Date dateAchat;
 
     private double prix;
